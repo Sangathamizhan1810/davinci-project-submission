@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nested Checkbox</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .category {
+      margin-top: 10px;
+    }
+    .items {
+      margin-left: 20px;
+    }
+    label {
+      display: block;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Nested Checkbox</h2>
+
+  <label>
+    <input type="checkbox" id="selectAll">
+    Select All
+  </label>
+
+  <div class="category">
+    <label>
+      <input type="checkbox" class="category-checkbox" data-category="fruits">
+      Fruits
+    </label>
+    <div class="items">
+      <label><input type="checkbox" class="child fruit"> Apple</label>
+      <label><input type="checkbox" class="child fruit"> Banana</label>
+      <label><input type="checkbox" class="child fruit"> Orange</label>
+    </div>
+  </div>
+
+  <div class="category">
+    <label>
+      <input type="checkbox" class="category-checkbox" data-category="vegetables">
+      Vegetables
+    </label>
+    <div class="items">
+      <label><input type="checkbox" class="child vegetable"> Carrot</label>
+      <label><input type="checkbox" class="child vegetable"> Broccoli</label>
+      <label><input type="checkbox" class="child vegetable"> Potato</label>
+    </div>
+  </div>
+
+  <script>
+    const selectAll = document.getElementById("selectAll");
+    const categoryCheckboxes = document.querySelectorAll(".category-checkbox");
+
+    
+    selectAll.addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      categoryCheckboxes.forEach(cat => {
+        cat.checked = checked;
+        cat.indeterminate = false;
+        toggleChildren(cat, checked);
+      });
+    });
+
+    
+    categoryCheckboxes.forEach(cat => {
+      cat.addEventListener("change", (e) => {
+        const checked = e.target.checked;
+        e.target.indeterminate = false;
+        toggleChildren(cat, checked);
+        updateSelectAll();
+      });
+    });
+
+   
+    document.querySelectorAll(".child").forEach(child => {
+      child.addEventListener("change", () => {
+        const categoryBox = child.closest(".category").querySelector(".category-checkbox");
+        updateCategoryState(categoryBox);
+        updateSelectAll();
+      });
+    });
+
+    
+    function toggleChildren(categoryBox, checked) {
+      const children = categoryBox.closest(".category").querySelectorAll(".child");
+      children.forEach(c => c.checked = checked);
+    }
+
+  
+    function updateCategoryState(categoryBox) {
+      const children = categoryBox.closest(".category").querySelectorAll(".child");
+      const allChecked = [...children].every(c => c.checked);
+      const someChecked = [...children].some(c => c.checked);
+
+      if (allChecked) {
+        categoryBox.checked = true;
+        categoryBox.indeterminate = false;
+      } else if (someChecked) {
+        categoryBox.checked = false;
+        categoryBox.indeterminate = true;
+      } else {
+        categoryBox.checked = false;
+        categoryBox.indeterminate = false;
+      }
+    }
+
+   
+    function updateSelectAll() {
+      const allChildren = document.querySelectorAll(".child");
+      const allCats = [...categoryCheckboxes];
+
+      const allChecked = [...allChildren].every(c => c.checked);
+      const someChecked = [...allChildren].some(c => c.checked);
+
+      if (allChecked) {
+        selectAll.checked = true;
+        selectAll.indeterminate = false;
+      } else if (someChecked) {
+        selectAll.checked = false;
+        selectAll.indeterminate = true;
+      } else {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+      }
+
+      
+      allCats.forEach(cat => updateCategoryState(cat));
+    }
+  </script>
+</body>
+</html>
